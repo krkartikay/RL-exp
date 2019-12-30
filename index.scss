@@ -1,1 +1,10 @@
+@import "./node_modules/bulma/sass/utilities/initial-variables.sass";
+
+$primary: $orange;
+
 @import "./node_modules/bulma/bulma.sass";
+
+.hspace {
+    display: inline-block;
+    width: 10px;
+}

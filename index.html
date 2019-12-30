@@ -4,6 +4,7 @@
 <head>
     <title>RLEXP</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="index.js"></script>
 </head>
 
 <body>
@@ -26,15 +27,21 @@
     <section class="level"></section>
 
     <section>
-        <div class="container">
+        <div class="container is-fluid">
             <div class="columns">
                 <div class="column">
                     <h3 class="heading">Controls</h3>
-                    <div class="buttons has-addons">
-                        <button class="button is-info is-selected">Stop</button>
-                        <button class="button">Run Slow</button>
-                        <button class="button">Run Fast</button>
+                    
+                    <div class="buttons has-addons" style="display: inline-flex;">
+                        <button id="stpbutton" onclick="setRunState(0)">Stop</button>
+                        <button id="runbutton" onclick="setRunState(1)">Run</button>
+                        <button id="ffwbutton" onclick="setRunState(2)">FastFwd</button>
                     </div>
+                    
+                    <div class="hspace"></div>
+
+                    <button class="button is-small is-inline" onclick="reset()">Reset Agent</button>
+
                     <h3 class="heading">Visualization</h3>
                     <!-- The canvas will go here -->
                     <div id="pixiapp"></div>
@@ -45,8 +52,6 @@
             </div>
         </div>
     </section>
-
-    <script src="index.js"></script>
 </body>
 
 </html>
