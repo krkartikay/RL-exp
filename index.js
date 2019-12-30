@@ -1,9 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import * as PIXI from "pixi.js";
+import "./index.scss";
 
-function HelloMessage({name}) {
-    return <div>Hello {name}!</div>;
-}
-
-var mountNode = document.getElementById("app");
-ReactDOM.render(<HelloMessage name="World" />, mountNode);
+const app = new PIXI.Application({width: 256, height: 256});
+document.querySelector("#pixiapp").appendChild(app.view);
