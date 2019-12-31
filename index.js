@@ -1,11 +1,14 @@
 import * as PIXI from "pixi.js";
 import "./index.scss";
+import Chart from 'chart.js';
 
 import Environment from "./environment";
 import RandomAgent from "./randomAgent";
 
+let pixiapp;
+
 function main() {
-    const pixiapp = new PIXI.Application({ width: 256, height: 256 });
+    pixiapp = new PIXI.Application({ width: 400, height: 300 });
     document.querySelector("#pixiapp").appendChild(pixiapp.view);
     setRunState(0); // stop
     reset();
@@ -26,9 +29,13 @@ function runWorld() {
             break;
         case 1: // run normal
             worldTick();
+            env.display();
+            agt.display();
             break;
         case 2: // run fast forward
             for (let i = 0; i < 10; i++) worldTick();
+            env.display();
+            agt.display();
             break;
     }
     requestAnimationFrame(runWorld);
@@ -44,8 +51,9 @@ window.setRunState = function (s) {
 }
 
 window.reset = function () {
-    window.env = new Environment();
-    window.agt = new RandomAgent();
+    window.env = new Environment(pixiapp);
+    window.agt = new RandomAgent(pixiapp);
+    // window.graph1 = new Chart(ctx, );
 }
 
 window.onload = main;

@@ -1,7 +1,7 @@
 export default
 class RandomAgent {
 
-    constructor() {
+    constructor(pixiapp) {
 
     }
 
@@ -10,6 +10,10 @@ class RandomAgent {
     }
 
     reward() {
+
+    }
+
+    display() {
 
     }
 
