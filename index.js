@@ -18,19 +18,19 @@ function main() {
 let episodes = 1;
 let totreward = 0;
 
-const avg_rew = new AverageValue(10);
-const avg_iter = new AverageValue(10);
+const avg_rew = new AverageValue();
+const avg_iter = new AverageValue();
 
 function worldTick() {
     if (env.terminated){
+        avg_iter.update(env.iterations);
+        avg_rew.update(totreward);
         graph1.data.datasets[0].data.push({ x: episodes - 1, y: env.iterations });
         graph1.data.datasets[1].data.push({ x: episodes - 1, y: avg_iter.value });
         graph1.update();
         graph2.data.datasets[0].data.push({ x: episodes - 1, y: totreward });
         graph2.data.datasets[1].data.push({ x: episodes - 1, y: avg_rew.value });
         graph2.update();
-        avg_iter.update(env.iterations);
-        avg_rew.update(totreward);
         totreward = 0;
         episodes += 1;
         setStatus(`Episode ${episodes}, avg. reward: ${Math.round(avg_rew.value * 100)/100},
@@ -92,13 +92,13 @@ window.reset = function () {
         data: {
             datasets: [{
                 showLine: true,
-                label: '',
-                data: [],
-                backgroundColor: "#ffdddd88"
-            }, {
-                showLine: true,
                 label: 'Iter/Ep',
                 data: [],
+            }, {
+                label: 'avg.',
+                showLine: true,
+                data: [],
+                backgroundColor: "#aaffaaaa"
             }],
         },
     });
@@ -111,13 +111,13 @@ window.reset = function () {
         data: {
             datasets: [{
                 showLine: true,
-                label: '',
-                data: [],
-                backgroundColor: "#ffdddd88",
-            },{
-                showLine: true,
                 label: 'Reward per Ep',
                 data: [],
+            },{
+                showLine: true,
+                label: 'avg.',
+                data: [],
+                backgroundColor: "#aaffaaaa",
             }],
         },
     });
