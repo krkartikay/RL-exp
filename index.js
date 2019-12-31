@@ -10,6 +10,7 @@ let pixiapp;
 
 function main() {
     pixiapp = new PIXI.Application({ width: 600, height: 450 });
+    pixiapp.stop();
     document.querySelector("#pixiapp").appendChild(pixiapp.view);
     reset();
     runWorld();
@@ -27,10 +28,9 @@ function worldTick() {
         avg_rew.update(totreward);
         graph1.data.datasets[0].data.push({ x: episodes - 1, y: env.iterations });
         graph1.data.datasets[1].data.push({ x: episodes - 1, y: avg_iter.value });
-        graph1.update();
         graph2.data.datasets[0].data.push({ x: episodes - 1, y: totreward });
         graph2.data.datasets[1].data.push({ x: episodes - 1, y: avg_rew.value });
-        graph2.update();
+       
         totreward = 0;
         episodes += 1;
         setStatus(`Episode ${episodes}, avg. reward: ${Math.round(avg_rew.value * 100)/100},
@@ -47,21 +47,27 @@ function worldTick() {
 }
 
 function runWorld() {
+    requestAnimationFrame(runWorld);
     switch (runState) {
         case 0: // stop
-            break;
+            return;
         case 1: // run normal
             worldTick();
             env.display();
             agt.display();
-            break;
+            graph1.update();
+            graph2.update();
+            pixiapp.render();
+            return;
         case 2: // run fast forward
-            for (let i = 0; i < 10; i++) worldTick();
+            for (let i = 0; i < 100; i++) worldTick();
             env.display();
             agt.display();
-            break;
+            graph1.update(0);
+            graph2.update(0);
+            pixiapp.render();
+            return;
     }
-    requestAnimationFrame(runWorld);
 }
 
 window.setStatus = function (text) {
@@ -121,6 +127,11 @@ window.reset = function () {
             }],
         },
     });
+    env.display();
+    agt.display();
+    graph1.update();
+    graph2.update();
+    pixiapp.render();
 }
 
 window.onload = main;
