@@ -9,7 +9,7 @@ import AverageValue from "./averages";
 let pixiapp;
 
 function main() {
-    pixiapp = new PIXI.Application({ width: 400, height: 300 });
+    pixiapp = new PIXI.Application({ width: 600, height: 450 });
     document.querySelector("#pixiapp").appendChild(pixiapp.view);
     reset();
     runWorld();
@@ -87,7 +87,7 @@ window.reset = function () {
         type: "scatter",
         title: {
             display: true,
-            text: 'Iter per Ep'
+            text: 'Iter/Ep'
         },
         data: {
             datasets: [{
@@ -111,7 +111,7 @@ window.reset = function () {
         data: {
             datasets: [{
                 showLine: true,
-                label: 'Reward per Ep',
+                label: 'Reward/Ep',
                 data: [],
             },{
                 showLine: true,

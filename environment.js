@@ -1,7 +1,7 @@
 import { Graphics, Application } from "pixi.js";
 
-const HEIGHT = 300;
-const WIDTH = 400;
+const HEIGHT = 450;
+const WIDTH = 600;
 
 const GRIDH = 12;
 const GRIDW = 16;
