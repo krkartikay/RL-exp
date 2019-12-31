@@ -50,7 +50,7 @@ class Environment {
     }
 
     performAction(action) {
-        this.iterations++;
+        this.iterations+=1;
         switch (action) {
             case "LEFT":
                 this.agent_X -= 1;

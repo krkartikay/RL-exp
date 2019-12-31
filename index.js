@@ -4,6 +4,7 @@ import Chart from 'chart.js';
 
 import Environment from "./environment";
 import RandomAgent from "./randomAgent";
+import AverageValue from "./averages";
 
 let pixiapp;
 
@@ -15,17 +16,32 @@ function main() {
 }
 
 let episodes = 1;
+let totreward = 0;
+
+const avg_rew = new AverageValue(10);
+const avg_iter = new AverageValue(10);
 
 function worldTick() {
     if (env.terminated){
+        graph1.data.datasets[0].data.push({ x: episodes - 1, y: env.iterations });
+        graph1.data.datasets[1].data.push({ x: episodes - 1, y: avg_iter.value });
+        graph1.update();
+        graph2.data.datasets[0].data.push({ x: episodes - 1, y: totreward });
+        graph2.data.datasets[1].data.push({ x: episodes - 1, y: avg_rew.value });
+        graph2.update();
+        avg_iter.update(env.iterations);
+        avg_rew.update(totreward);
+        totreward = 0;
         episodes += 1;
-        setStatus(`Episode ${episodes}, iterations in last ep: ${env.iterations}`);
+        setStatus(`Episode ${episodes}, avg. reward: ${Math.round(avg_rew.value * 100)/100},
+                    avg. iterations per ep.: ${Math.round(avg_iter.value * 100)/100}`);
         env.reset();
     } else {
         const obs = env.getObservation();
         const actions = env.getActions();
         const act = agt.chooseAction(obs, actions);
         const reward = env.performAction(act);
+        totreward += reward;
         agt.reward(reward);
     }
 }
@@ -67,7 +83,44 @@ window.reset = function () {
     setStatus(`Episode ${episodes}`);
     window.env = new Environment(pixiapp);
     window.agt = new RandomAgent(pixiapp);
-    // window.graph1 = new Chart(ctx, );
+    window.graph1 = new Chart('iter_ep', {
+        type: "scatter",
+        title: {
+            display: true,
+            text: 'Iter per Ep'
+        },
+        data: {
+            datasets: [{
+                showLine: true,
+                label: '',
+                data: [],
+                backgroundColor: "#ffdddd88"
+            }, {
+                showLine: true,
+                label: 'Iter/Ep',
+                data: [],
+            }],
+        },
+    });
+    window.graph2 = new Chart('rew_ep', {
+        type: "scatter",
+        title: {
+            display: true,
+            text: 'Reward/Ep'
+        },
+        data: {
+            datasets: [{
+                showLine: true,
+                label: '',
+                data: [],
+                backgroundColor: "#ffdddd88",
+            },{
+                showLine: true,
+                label: 'Reward per Ep',
+                data: [],
+            }],
+        },
+    });
 }
 
 window.onload = main;
