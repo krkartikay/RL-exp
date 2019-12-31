@@ -14,24 +14,63 @@ class Environment {
 
     constructor(pixiapp) {
         this.pixiapp = pixiapp;
+        this.reset();
+    }
+
+    reset(){
         this.agent_X = 0;
         this.agent_Y = 0;
         this.target_X = 19;
         this.target_Y = 14;
+        this.iterations = 0;
+        this.terminated = false;
         this.initGraphics();
         this.display();
     }
 
     getObservation() {
-
+        return [this.agent_X, this.agent_Y, this.target_X, this.target_Y];
     }
 
     getActions() {
-
+        const ans = []
+        if (this.agent_X > 0){
+            ans.push("LEFT")
+        }
+        if (this.agent_X < GRIDW){
+            ans.push("RIGHT")
+        }
+        if (this.agent_Y > 0) {
+            ans.push("UP")
+        }
+        if (this.agent_Y < GRIDH) {
+            ans.push("DOWN")
+        }
+        return ans;
     }
 
-    performAction() {
-        
+    performAction(action) {
+        this.iterations++;
+        switch (action) {
+            case "LEFT":
+                this.agent_X -= 1;
+                break;
+            case "RIGHT":
+                this.agent_X += 1;
+                break;
+            case "UP":
+                this.agent_Y -= 1;
+                break;
+            case "DOWN":
+                this.agent_Y += 1;
+                break;
+        }
+        if (this.agent_X == this.target_X && this.agent_Y == this.target_Y){
+            this.terminated = true;
+            return 0;
+        } else {
+            return -1;
+        }
     }
 
     initGraphics() {

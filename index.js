@@ -15,12 +15,20 @@ function main() {
     runWorld();
 }
 
+let episodes = 1;
+
 function worldTick() {
-    const obs = env.getObservation();
-    const actions = env.getActions();
-    const act = agt.chooseAction(obs, actions);
-    const reward = env.performAction(act);
-    agt.reward(reward);
+    if (env.terminated){
+        episodes += 1;
+        setStatus(`Episode ${episodes}, iterations in last ep: ${env.iterations}`);
+        env.reset();
+    } else {
+        const obs = env.getObservation();
+        const actions = env.getActions();
+        const act = agt.chooseAction(obs, actions);
+        const reward = env.performAction(act);
+        agt.reward(reward);
+    }
 }
 
 function runWorld() {
@@ -41,6 +49,10 @@ function runWorld() {
     requestAnimationFrame(runWorld);
 }
 
+window.setStatus = function (text) {
+    document.querySelector("#status").textContent = text;
+}
+
 window.setRunState = function (s) {
     const buttons = ['stpbutton', 'runbutton', 'ffwbutton'];
     for (const id of buttons) {
@@ -51,6 +63,8 @@ window.setRunState = function (s) {
 }
 
 window.reset = function () {
+    episodes = 1;
+    setStatus(`Episode ${episodes}`);
     window.env = new Environment(pixiapp);
     window.agt = new RandomAgent(pixiapp);
     // window.graph1 = new Chart(ctx, );
