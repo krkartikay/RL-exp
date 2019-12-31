@@ -3,8 +3,8 @@ import { Graphics, Application } from "pixi.js";
 const HEIGHT = 300;
 const WIDTH = 400;
 
-const GRIDH = 15;
-const GRIDW = 20;
+const GRIDH = 12;
+const GRIDW = 16;
 
 const SQH = (HEIGHT-1)/GRIDH; // these both should
 const SQW = (WIDTH-2)/GRIDW; // be about the same
@@ -18,10 +18,10 @@ class Environment {
     }
 
     reset(){
-        this.agent_X = 0;
-        this.agent_Y = 0;
-        this.target_X = 19;
-        this.target_Y = 14;
+        this.agent_X = randomInt(0, GRIDW - 1);
+        this.agent_Y = randomInt(0, GRIDH - 1);
+        this.target_X = randomInt(0, GRIDW - 1);
+        this.target_Y = randomInt(0, GRIDH - 1);
         this.iterations = 0;
         this.terminated = false;
         this.initGraphics();
@@ -37,13 +37,13 @@ class Environment {
         if (this.agent_X > 0){
             ans.push("LEFT")
         }
-        if (this.agent_X < GRIDW){
+        if (this.agent_X < GRIDW - 1){
             ans.push("RIGHT")
         }
         if (this.agent_Y > 0) {
             ans.push("UP")
         }
-        if (this.agent_Y < GRIDH) {
+        if (this.agent_Y < GRIDH - 1) {
             ans.push("DOWN")
         }
         return ans;
@@ -79,7 +79,7 @@ class Environment {
         background.beginFill(0xffffff);
         background.drawRect(0, 0, WIDTH, HEIGHT);
         background.endFill();
-        background.lineStyle(1, 0x000000, 1);
+        background.lineStyle(1, 0x000000, 0.3);
         for (let i = 1; i <= WIDTH; i += SQH) {
             background.moveTo(i, 0);
             background.lineTo(i, HEIGHT);
@@ -93,15 +93,15 @@ class Environment {
         // make an agent
         this.agent = new Graphics();
         this.agent.lineStyle(1, 0x000000, 1);
-        this.agent.beginFill(0xFF00FF);
-        this.agent.drawCircle(SQH/2, SQW/2, Math.min(SQH, SQW)/2.1);
+        this.agent.beginFill(0x22FFFF, 0.5);
+        this.agent.drawCircle(SQW/2, SQH/2, Math.min(SQH, SQW)/2.2);
         this.pixiapp.stage.addChild(this.agent);
         
         // make an target
         this.target = new Graphics();
         this.target.lineStyle(1, 0x000000, 1);
-        this.target.beginFill(0xFFFF00);
-        this.target.drawStar(SQW/2, SQH/2, 5, Math.min(SQH, SQW)/2.1);
+        this.target.beginFill(0xFFFF00, 0.5);
+        this.target.drawStar(SQW/2, SQH/2, 5, Math.min(SQH, SQW)/2.2);
         this.pixiapp.stage.addChild(this.target);
     }
 
@@ -113,4 +113,9 @@ class Environment {
         this.target.y = SQH * this.target_Y;
     }
 
+}
+
+// helper
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }

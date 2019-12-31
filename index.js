@@ -10,7 +10,6 @@ let pixiapp;
 function main() {
     pixiapp = new PIXI.Application({ width: 400, height: 300 });
     document.querySelector("#pixiapp").appendChild(pixiapp.view);
-    setRunState(0); // stop
     reset();
     runWorld();
 }
@@ -63,6 +62,7 @@ window.setRunState = function (s) {
 }
 
 window.reset = function () {
+    setRunState(0); // stop
     episodes = 1;
     setStatus(`Episode ${episodes}`);
     window.env = new Environment(pixiapp);

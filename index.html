@@ -32,15 +32,15 @@
                 <div class="column">
                     <h3 class="heading">Controls</h3>
                     
+                    <button class="button is-small is-inline is-danger" onclick="reset()">Reset</button>
+                    
+                    <div class="hspace"></div>
+
                     <div class="buttons has-addons" style="display: inline-flex;">
                         <button id="stpbutton" onclick="setRunState(0)">Stop</button>
                         <button id="runbutton" onclick="setRunState(1)">Run</button>
                         <button id="ffwbutton" onclick="setRunState(2)">FastFwd</button>
                     </div>
-                    
-                    <div class="hspace"></div>
-
-                    <button class="button is-small is-inline" onclick="reset()">Reset</button>
 
                     <h3 class="heading">Visualization</h3>
                     <!-- The canvas will go here -->
