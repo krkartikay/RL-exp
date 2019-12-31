@@ -42,6 +42,17 @@
                         <button id="ffwbutton" onclick="setRunState(2)">FastFwd</button>
                     </div>
 
+                    <div class="hspace"></div>
+
+                    <select id="agt" class="select field is-small" style="background-color: white; border-color: #dbdbdb;" onchange="reset()">
+                        <option value="SimpleAgent">SimpleAgent</option>
+                        <option value="RandomAgent">RandomAgent</option>
+                    </select>
+                    
+                    <select id="env" class="select field is-small" style="background-color: white; border-color: #dbdbdb;" onchange="reset()">
+                        <option value="DefaultEnvironment">DefaultEnvironment</option>
+                    </select>
+
                     <h3 class="heading">Visualization</h3>
                     <!-- The canvas will go here -->
                     <div id="pixiapp"></div>

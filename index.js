@@ -2,8 +2,8 @@ import * as PIXI from "pixi.js";
 import "./index.scss";
 import Chart from 'chart.js';
 
-import Environment from "./environment";
-import RandomAgent from "./randomAgent";
+import * as Environments from "./environments";
+import * as Agents from "./agents";
 import AverageValue from "./averages";
 
 let pixiapp;
@@ -87,8 +87,10 @@ window.reset = function () {
     setRunState(0); // stop
     episodes = 1;
     setStatus(`Episode ${episodes}`);
-    window.env = new Environment(pixiapp);
-    window.agt = new RandomAgent(pixiapp);
+    const envt = eval("Environments."+document.querySelector("#env").value);
+    const agnt = eval("Agents."+document.querySelector("#agt").value);
+    window.env = new envt(pixiapp);
+    window.agt = new agnt(pixiapp);
     window.graph1 = new Chart('iter_ep', {
         type: "scatter",
         title: {

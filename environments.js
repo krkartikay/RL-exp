@@ -9,8 +9,12 @@ const GRIDW = 16;
 const SQH = (HEIGHT-1)/GRIDH; // these both should
 const SQW = (WIDTH-2)/GRIDW; // be about the same
 
-export default
-class Environment {
+const LEFT  = 1;
+const RIGHT = 2;
+const UP    = 3;
+const DOWN  = 4;
+
+export class DefaultEnvironment {
 
     constructor(pixiapp) {
         this.pixiapp = pixiapp;
@@ -35,39 +39,43 @@ class Environment {
     getActions() {
         const ans = []
         if (this.agent_X > 0){
-            ans.push("LEFT")
+            ans.push(LEFT)
         }
         if (this.agent_X < GRIDW - 1){
-            ans.push("RIGHT")
+            ans.push(RIGHT)
         }
         if (this.agent_Y > 0) {
-            ans.push("UP")
+            ans.push(UP)
         }
         if (this.agent_Y < GRIDH - 1) {
-            ans.push("DOWN")
+            ans.push(DOWN)
         }
         return ans;
     }
 
     performAction(action) {
         this.iterations+=1;
+        if (!this.getActions().includes(action)){
+            setRunState(0);
+            throw Error(`Action ${action} not allowed!`);
+        }
         switch (action) {
-            case "LEFT":
+            case LEFT:
                 this.agent_X -= 1;
                 break;
-            case "RIGHT":
+            case RIGHT:
                 this.agent_X += 1;
                 break;
-            case "UP":
+            case UP:
                 this.agent_Y -= 1;
                 break;
-            case "DOWN":
+            case DOWN:
                 this.agent_Y += 1;
                 break;
         }
         if (this.agent_X == this.target_X && this.agent_Y == this.target_Y){
             this.terminated = true;
-            return 0;
+            return +200;
         } else {
             return -1;
         }
