@@ -3,8 +3,8 @@ import { Graphics, Application } from "pixi.js";
 let HEIGHT = 450;
 let WIDTH = 600;
 
-const GRIDH = 3;
-const GRIDW = 4;
+const GRIDH = 6;
+const GRIDW = 8;
 
 let SQH = (HEIGHT-1)/GRIDH; // these both should
 let SQW = (WIDTH-2)/GRIDW; // be about the same
@@ -50,6 +50,7 @@ export class DefaultEnvironment {
         if (this.agent_Y < GRIDH - 1) {
             ans.push(DOWN)
         }
+        shuffle(ans);
         return ans;
     }
 
@@ -132,4 +133,8 @@ export class DefaultEnvironment {
 // helper
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(array) {
+  array.sort(() => Math.random() - 0.5);
 }

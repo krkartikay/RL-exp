@@ -2,7 +2,7 @@ import * as tf from "@tensorflow/tfjs";
 import { math, model } from "@tensorflow/tfjs";
 
 const MAX_EXPERIENCE = 5000;
-const EXPERIENCE_SAMPLE = 1000;
+const EXPERIENCE_SAMPLE = 500;
 
 export class RandomAgent {
 
@@ -28,7 +28,7 @@ export class RandomAgent {
 
 export class DQNAgent {
 
-    constructor(pixiapp, epsilon = 0.35, alpha=0.5, gamma=0.8) {
+    constructor(pixiapp, alpha=0.5, gamma=0.8) {
         this.pixiapp = pixiapp;
 
         this.experience = [];
@@ -38,7 +38,7 @@ export class DQNAgent {
         this.last_reward = 0;
         this.current_q = 0;
 
-        this.epsilon = epsilon;
+        this.time = 1;
         this.alpha = alpha;
         this.gamma = gamma;
 
@@ -46,8 +46,7 @@ export class DQNAgent {
         this.qnet = tf.sequential({
             name: "qnet",
             layers: [
-                tf.layers.dense({ units: 5, activation: 'sigmoid', inputShape: [3] }),
-                // tf.layers.dense({ units: 20, activation: 'sigmoid' }),
+                tf.layers.dense({ units: 10, activation: 'sigmoid', inputShape: [3] }),
                 tf.layers.dense({ units: 1 }),
             ]
         })
@@ -97,6 +96,8 @@ export class DQNAgent {
             this.last_act = actions[randomInt(0, actions.length - 1)];
         }
         // return chosen action;
+        this.time += 1;
+        this.epsilon = Math.min(1, 500/this.time);
         return this.last_act;
     }
 
@@ -123,7 +124,7 @@ export class DQNAgent {
                 epochs: 1,
             }
         );
-        setStatus2(`current q: ${round2(this.current_q)}\nloss: ${round2(hist.history.loss[0])}`);
+        setStatus2(`iter:${round2(this.time)}\ncurrent q: ${round2(this.current_q)}\nloss: ${round2(hist.history.loss[0])}`);
     }
 
 }
