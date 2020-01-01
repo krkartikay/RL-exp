@@ -1,13 +1,13 @@
 import { Graphics, Application } from "pixi.js";
 
-const HEIGHT = 450;
-const WIDTH = 600;
+let HEIGHT = 450;
+let WIDTH = 600;
 
 const GRIDH = 3;
 const GRIDW = 4;
 
-const SQH = (HEIGHT-1)/GRIDH; // these both should
-const SQW = (WIDTH-2)/GRIDW; // be about the same
+let SQH = (HEIGHT-1)/GRIDH; // these both should
+let SQW = (WIDTH-2)/GRIDW; // be about the same
 
 const LEFT  = 1;
 const RIGHT = 2;
@@ -82,6 +82,12 @@ export class DefaultEnvironment {
     }
 
     initGraphics() {
+        HEIGHT = this.pixiapp.renderer.view.height;
+        WIDTH = this.pixiapp.renderer.view.width;
+
+        SQH = (HEIGHT - 1) / GRIDH;
+        SQW = (WIDTH - 2) / GRIDW;
+
         // make grid background
         const background = new Graphics();
         background.beginFill(0xffffff);

@@ -9,7 +9,9 @@ import AverageValue from "./averages";
 let pixiapp;
 
 function main() {
-    pixiapp = new PIXI.Application({ width: 600, height: 450 });
+    let width = Math.min(600, 0.8*window.innerWidth);
+    let height = width*3/4;
+    pixiapp = new PIXI.Application({ width: width, height: height });
     pixiapp.stop();
     document.querySelector("#pixiapp").appendChild(pixiapp.view);
     reset();
