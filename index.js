@@ -19,8 +19,8 @@ function main() {
 let episodes = 1;
 let totreward = 0;
 
-const avg_rew = new AverageValue();
-const avg_iter = new AverageValue();
+let avg_rew;
+let avg_iter;
 
 async function worldTick() {
     if (env.terminated){
@@ -75,6 +75,9 @@ async function runWorld() {
 window.setStatus = function (text) {
     document.querySelector("#status").textContent = text;
 }
+window.setStatus2 = function (text) {
+    document.querySelector("#status2").textContent = text;
+}
 
 window.setRunState = function (s) {
     const buttons = ['stpbutton', 'runbutton', 'ffwbutton'];
@@ -84,16 +87,23 @@ window.setRunState = function (s) {
     document.querySelector("#" + buttons[s]).className += " is-info is-selected";
     window.runState = s;
     requestAnimationFrame(runWorld);
+    if(s != 0){
+        setStatus(`Running`);
+    } else {
+        setStatus(`Ready`);
+    }
+    setStatus2("...");
 }
 
 window.reset = function () {
     setRunState(0); // stop
     episodes = 1;
-    setStatus(`Episode ${episodes}`);
     const envt = eval("Environments."+document.querySelector("#env").value);
     const agnt = eval("Agents."+document.querySelector("#agt").value);
     window.env = new envt(pixiapp);
     window.agt = new agnt(pixiapp);
+    avg_iter = new AverageValue();
+    avg_rew = new AverageValue();
     window.graph1 = new Chart('iter_ep', {
         type: "scatter",
         title: {

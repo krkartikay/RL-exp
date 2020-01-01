@@ -3,8 +3,8 @@ import { Graphics, Application } from "pixi.js";
 const HEIGHT = 450;
 const WIDTH = 600;
 
-const GRIDH = 12;
-const GRIDW = 16;
+const GRIDH = 3;
+const GRIDW = 4;
 
 const SQH = (HEIGHT-1)/GRIDH; // these both should
 const SQW = (WIDTH-2)/GRIDW; // be about the same
@@ -24,8 +24,8 @@ export class DefaultEnvironment {
     reset(){
         this.agent_X = randomInt(0, GRIDW - 1);
         this.agent_Y = randomInt(0, GRIDH - 1);
-        this.target_X = randomInt(0, GRIDW - 1);
-        this.target_Y = randomInt(0, GRIDH - 1);
+        this.target_X = 3; //randomInt(0, GRIDW - 1);
+        this.target_Y = 2; //randomInt(0, GRIDH - 1);
         this.iterations = 0;
         this.terminated = false;
         this.initGraphics();
@@ -33,7 +33,7 @@ export class DefaultEnvironment {
     }
 
     getObservation() {
-        return [this.agent_X, this.agent_Y, this.target_X, this.target_Y];
+        return [this.agent_X, this.agent_Y];
     }
 
     getActions() {
@@ -75,7 +75,7 @@ export class DefaultEnvironment {
         }
         if (this.agent_X == this.target_X && this.agent_Y == this.target_Y){
             this.terminated = true;
-            return +200;
+            return +20;
         } else {
             return -1;
         }
@@ -102,23 +102,23 @@ export class DefaultEnvironment {
         this.agent = new Graphics();
         this.agent.lineStyle(1, 0x000000, 1);
         this.agent.beginFill(0x22FFFF, 0.5);
-        this.agent.drawCircle(SQW/2, SQH/2, Math.min(SQH, SQW)/2.2);
+        this.agent.drawCircle(SQH/2, SQW/2, Math.min(SQH, SQW)/2.2);
         this.pixiapp.stage.addChild(this.agent);
         
         // make an target
         this.target = new Graphics();
         this.target.lineStyle(1, 0x000000, 1);
         this.target.beginFill(0xFFFF00, 0.5);
-        this.target.drawStar(SQW/2, SQH/2, 5, Math.min(SQH, SQW)/2.2);
+        this.target.drawStar(SQH/2, SQW/2, 5, Math.min(SQH, SQW)/2.2);
         this.pixiapp.stage.addChild(this.target);
     }
 
 
     display(){
-        this.agent.x = SQW * this.agent_X;
-        this.agent.y = SQH * this.agent_Y;
-        this.target.x = SQW * this.target_X;
-        this.target.y = SQH * this.target_Y;
+        this.agent.x = SQH * this.agent_X;
+        this.agent.y = SQW * this.agent_Y;
+        this.target.x = SQH * this.target_X;
+        this.target.y = SQW * this.target_Y;
     }
 
 }
