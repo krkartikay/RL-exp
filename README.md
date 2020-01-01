@@ -5,7 +5,8 @@ using tensorflow.js. Run it on your browser now! http://kartikay26.github.io/RL-
 
 Screenshots:
 
-[TODO]
+![visualization](https://github.com/Kartikay26/RL-exp/blob/master/screenshots/viz.png?raw=true)
+![graph](https://github.com/Kartikay26/RL-exp/blob/master/screenshots/graphs.png?raw=true)
 
 The visualisation shows an agent (blue circle) which tries to reach a fixed target (yellow star).
 It gets a reward of -1 per turn, and +20 reward upon reaching the target. Therefore it should
