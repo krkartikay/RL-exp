@@ -22,7 +22,7 @@ let totreward = 0;
 const avg_rew = new AverageValue();
 const avg_iter = new AverageValue();
 
-function worldTick() {
+async function worldTick() {
     if (env.terminated){
         avg_iter.update(env.iterations);
         avg_rew.update(totreward);
@@ -39,33 +39,35 @@ function worldTick() {
     } else {
         const obs = env.getObservation();
         const actions = env.getActions();
-        const act = agt.chooseAction(obs, actions);
+        const act = await agt.chooseAction(obs, actions);
         const reward = env.performAction(act);
         totreward += reward;
-        agt.reward(reward);
+        await agt.reward(reward);
     }
 }
 
-function runWorld() {
-    requestAnimationFrame(runWorld);
+async function runWorld() {
     switch (runState) {
         case 0: // stop
             return;
         case 1: // run normal
-            worldTick();
+            await worldTick();
             env.display();
             agt.display();
             graph1.update();
             graph2.update();
             pixiapp.render();
+            requestAnimationFrame(runWorld);
             return;
         case 2: // run fast forward
-            for (let i = 0; i < 100; i++) worldTick();
+            for (let i = 0; i < 100; i++)
+                await worldTick();
             env.display();
             agt.display();
             graph1.update(0);
             graph2.update(0);
             pixiapp.render();
+            requestAnimationFrame(runWorld);
             return;
     }
 }
@@ -81,6 +83,7 @@ window.setRunState = function (s) {
     }
     document.querySelector("#" + buttons[s]).className += " is-info is-selected";
     window.runState = s;
+    requestAnimationFrame(runWorld);
 }
 
 window.reset = function () {

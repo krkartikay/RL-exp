@@ -20,7 +20,7 @@ export class RandomAgent {
 
 // ---------------------------------------------------------------
 
-export class SimpleAgent {
+export class DQNAgent {
 
     constructor(pixiapp) {
         this.pixiapp = pixiapp;
