@@ -18,6 +18,7 @@ export class DefaultEnvironment {
 
     constructor(pixiapp) {
         this.pixiapp = pixiapp;
+        this.initGraphics();
         this.reset();
     }
 
@@ -28,7 +29,6 @@ export class DefaultEnvironment {
         this.target_Y = 2; //randomInt(0, GRIDH - 1);
         this.iterations = 0;
         this.terminated = false;
-        this.initGraphics();
         this.display();
     }
 

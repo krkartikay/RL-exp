@@ -1,8 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
-import { math, model } from "@tensorflow/tfjs";
+import { Graphics } from "pixi.js";
 
-const MAX_EXPERIENCE = 5000;
-const EXPERIENCE_SAMPLE = 500;
+let HEIGHT, WIDTH, SQH, SQW, GRIDH = 6, GRIDW = 8; // only for graphics
 
 export class RandomAgent {
 
@@ -28,7 +27,20 @@ export class RandomAgent {
 
 export class DQNAgent {
 
-    constructor(pixiapp, alpha=0.5, gamma=0.8) {
+    constructor(
+            pixiapp,
+            alpha = 1 / 3,
+            gamma = 0.5,
+            lr = 0.05,
+            epsilon_iter = 1000,
+            MAX_EXPERIENCE = 10000,
+            EXPERIENCE_SAMPLE = 2048,
+            VAL_RANDOM_SCALE = 0.01,
+        ) {
+
+        this.MAX_EXPERIENCE = MAX_EXPERIENCE;
+        this.EXPERIENCE_SAMPLE = EXPERIENCE_SAMPLE;
+
         this.pixiapp = pixiapp;
 
         this.experience = [];
@@ -41,25 +53,42 @@ export class DQNAgent {
         this.time = 1;
         this.alpha = alpha;
         this.gamma = gamma;
+        this.epsilon_iter = epsilon_iter;
 
         // this.qnet = some tensorflow thingy;
         this.qnet = tf.sequential({
             name: "qnet",
             layers: [
-                tf.layers.dense({ units: 10, activation: 'sigmoid', inputShape: [3] }),
-                tf.layers.dense({ units: 1 }),
+                tf.layers.dense({
+                    units: 10,
+                    activation: 'sigmoid',
+                    inputShape: [3],
+                    // kernelRegularizer: tf.regularizers.l2(),
+                    // biasRegularizer: tf.regularizers.l2()
+                }),
+                tf.layers.dense({
+                    units: 10,
+                }),
+                tf.layers.dense({
+                    units: 1,
+                }),
             ]
         })
 
         this.predict_q = (obs, act) => tf.tidy(() => this.qnet.predict(
-                tf.tensor([[...obs, act]])
-            ).dataSync()[0]);
+            tf.tensor([[...obs, act]])
+        ).dataSync()[0]) + VAL_RANDOM_SCALE * Math.random();
 
         this.qnet.compile({
             loss: tf.losses.meanSquaredError,
-            optimizer: tf.train.sgd(0.02),
+            optimizer: tf.train.sgd(lr),
             metrics: ['mse']
         })
+
+        // for arrows
+        this.arrows = [[], [], [], []];
+        this.initGraphics();
+        this.display();
     }
 
     async chooseAction(obs, actions) {
@@ -68,19 +97,19 @@ export class DQNAgent {
         let max_act_val = -100, max_act = -1;
         for (const act of actions) {
             let action_value = this.predict_q(obs, act);
-            if(max_act_val < action_value){
+            if (max_act_val < action_value) {
                 max_act_val = action_value;
                 max_act = act;
             }
         }
         this.current_q = max_act_val;
-        if (this.last_obs){
-            if (this.experience.length > MAX_EXPERIENCE) {
+        if (this.last_obs) {
+            if (this.experience.length > this.MAX_EXPERIENCE) {
                 this.experience.shift();
             }
             this.experience.push([[...this.last_obs, this.last_act],
-                             (1-this.alpha) * this.predict_q(this.last_obs, this.last_act)
-                             + this.alpha * [this.last_reward + this.gamma * (this.current_q)]
+            (1 - this.alpha) * this.predict_q(this.last_obs, this.last_act)
+            + this.alpha * [this.last_reward + this.gamma * (this.current_q)]
             ]);
         }
         // learn from this.experience
@@ -89,7 +118,7 @@ export class DQNAgent {
         // PREDICT THIS ONE
         this.last_obs = obs;
         // choose according to epsilon greedy policy;
-        if (Math.random() >= this.epsilon){
+        if (Math.random() >= this.epsilon) {
             // from actions, choose one with highest action_value;
             this.last_act = max_act;
         } else {
@@ -97,7 +126,7 @@ export class DQNAgent {
         }
         // return chosen action;
         this.time += 1;
-        this.epsilon = Math.min(1, 500/this.time);
+        this.epsilon = Math.min(1, this.epsilon_iter / this.time);
         return this.last_act;
     }
 
@@ -105,12 +134,85 @@ export class DQNAgent {
         this.last_reward = r;
     }
 
-    display() {
+    initGraphics() {
+        HEIGHT = this.pixiapp.renderer.view.height;
+        WIDTH = this.pixiapp.renderer.view.width;
+
+        SQH = (HEIGHT - 1) / GRIDH;
+        SQW = (WIDTH - 2) / GRIDW;
+
+        this.allStateActionPairs = [];
+        for (let i = 0; i < GRIDH; i++) {
+            for (let j = 0; j < GRIDW; j++) {
+                for (let k = 1; k <= 4; k++) {
+                    this.allStateActionPairs.push([i, j, k]);
+                }
+            }
+        }
+
+        this.getArrowWeights = () => tf.tidy(() => {
+            const t = tf.tensor(this.allStateActionPairs);
+            const d = this.qnet.predict(t).dataSync();
+            return this.allStateActionPairs.map((v, i) => [...v, d[i]]);
+        })
+
+
+        for (let i = 0; i < GRIDH; i++) {
+            for (let j = 0; j < GRIDW; j++) {
+                const newArrow = (p, q) => {
+                    const arrRed = new Graphics();
+                    arrRed.lineStyle(5, 0x550000, 0.5);
+                    arrRed.lineTo(SQH * p / 3, SQW * q / 3);
+                    arrRed.position.x = SQW * (j + 0.5);
+                    arrRed.position.y = SQW * (i + 0.5);
+                    const arrGreen = new Graphics();
+                    arrGreen.lineStyle(5, 0x005500, 0.5);
+                    arrGreen.lineTo(SQH * p / 3, SQW * q / 3);
+                    arrGreen.position.x = SQW * (j + 0.5);
+                    arrGreen.position.y = SQW * (i + 0.5);
+                    return [arrGreen, arrRed];
+                }
+                const arrLeft = newArrow(-1, 0);
+                this.pixiapp.stage.addChild(arrLeft[0]);
+                this.pixiapp.stage.addChild(arrLeft[1]);
+                this.arrows[0].push(arrLeft);
+                const arrRight = newArrow(+1, 0);
+                this.pixiapp.stage.addChild(arrRight[0]);
+                this.pixiapp.stage.addChild(arrRight[1]);
+                this.arrows[1].push(arrRight);
+                const arrUp = newArrow(0, -1);
+                this.pixiapp.stage.addChild(arrUp[0]);
+                this.pixiapp.stage.addChild(arrUp[1]);
+                this.arrows[2].push(arrUp);
+                const arrDown = newArrow(0, +1);
+                this.pixiapp.stage.addChild(arrDown[0]);
+                this.pixiapp.stage.addChild(arrDown[1]);
+                this.arrows[3].push(arrDown);
+            }
+        }
 
     }
 
-    async learn(){
-        const sample_exp = [...Array(EXPERIENCE_SAMPLE).keys()].map(() => this.experience[randomInt(0, this.experience.length - 1)]);
+    display() {
+        const SCALE = 3;
+        for (const [i, j, k, v] of this.getArrowWeights()) {
+            const idx = i * GRIDW + j;
+            if (v > 0) {
+                this.arrows[k - 1][idx][0].scale.set(v / SCALE);
+                this.arrows[k - 1][idx][1].scale.set(0);
+            } else {
+                this.arrows[k - 1][idx][0].scale.set(0);
+                this.arrows[k - 1][idx][1].scale.set(v / SCALE);
+            }
+        }
+        setStatus2(`iter:${round2(this.time)}
+           current q: ${round2(this.current_q)}
+           loss: ${round2(this.last_loss)}
+           epsilon: ${round2(this.epsilon)}`);
+    }
+
+    async learn() {
+        const sample_exp = [...Array(this.EXPERIENCE_SAMPLE).keys()].map(() => this.experience[randomInt(0, this.experience.length - 1)]);
         const hist = await this.qnet.fit(
             tf.tidy(() => {
                 const training_x = tf.tensor(sample_exp.map((e) => e[0]));
@@ -122,9 +224,10 @@ export class DQNAgent {
             }),
             {
                 epochs: 1,
+                batchSize: this.EXPERIENCE_SAMPLE,
             }
         );
-        setStatus2(`iter:${round2(this.time)}\ncurrent q: ${round2(this.current_q)}\nloss: ${round2(hist.history.loss[0])}`);
+        this.last_loss = hist.history.loss[0];
     }
 
 }
@@ -136,6 +239,6 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function round2(x){
-    return Math.round(x * 100)/100;
+function round2(x) {
+    return Math.round(x * 100) / 100;
 }

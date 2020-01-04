@@ -11,7 +11,7 @@ let pixiapp;
 function main() {
     let width = Math.min(600, 0.8*window.innerWidth);
     let height = width*3/4;
-    pixiapp = new PIXI.Application({ width: width, height: height });
+    pixiapp = new PIXI.Application({ width: width, height: height, antialias: true });
     pixiapp.stop();
     document.querySelector("#pixiapp").appendChild(pixiapp.view);
     reset();
