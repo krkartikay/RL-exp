@@ -25,8 +25,8 @@ export class DefaultEnvironment {
     reset(){
         this.agent_X = randomInt(0, GRIDW - 1);
         this.agent_Y = randomInt(0, GRIDH - 1);
-        this.target_X = 3; //randomInt(0, GRIDW - 1);
-        this.target_Y = 2; //randomInt(0, GRIDH - 1);
+        this.target_X = GRIDW - 1;
+        this.target_Y = GRIDH - 1;
         this.iterations = 0;
         this.terminated = false;
         this.display();

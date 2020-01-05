@@ -31,11 +31,11 @@ export class DQNAgent {
             pixiapp,
             alpha = 1 / 3,
             gamma = 0.5,
-            lr = 0.05,
+            lr = 0.03,
             epsilon_iter = 1000,
             MAX_EXPERIENCE = 10000,
-            EXPERIENCE_SAMPLE = 2048,
-            VAL_RANDOM_SCALE = 0.01,
+            EXPERIENCE_SAMPLE = 1024,
+            VAL_RANDOM_SCALE = 0.1,
         ) {
 
         this.MAX_EXPERIENCE = MAX_EXPERIENCE;
@@ -60,14 +60,11 @@ export class DQNAgent {
             name: "qnet",
             layers: [
                 tf.layers.dense({
-                    units: 10,
+                    units: 5,
                     activation: 'sigmoid',
-                    inputShape: [3],
+                    inputShape: [6],
                     // kernelRegularizer: tf.regularizers.l2(),
                     // biasRegularizer: tf.regularizers.l2()
-                }),
-                tf.layers.dense({
-                    units: 10,
                 }),
                 tf.layers.dense({
                     units: 1,
@@ -75,13 +72,16 @@ export class DQNAgent {
             ]
         })
 
+        this.net_repr = (obs, act) => [...obs, act == 1, act == 2, act == 3, act == 4]
+        this.net_repr_inv = (x,y, a1,a2,a3,a4) => [[x,y], a1*1+a2*2+a3*3+a4*4]
+
         this.predict_q = (obs, act) => tf.tidy(() => this.qnet.predict(
-            tf.tensor([[...obs, act]])
+            tf.tensor([this.net_repr(obs, act)])
         ).dataSync()[0]) + VAL_RANDOM_SCALE * Math.random();
 
         this.qnet.compile({
             loss: tf.losses.meanSquaredError,
-            optimizer: tf.train.sgd(lr),
+            optimizer: tf.train.momentum(lr, 0.9),
             metrics: ['mse']
         })
 
@@ -107,9 +107,9 @@ export class DQNAgent {
             if (this.experience.length > this.MAX_EXPERIENCE) {
                 this.experience.shift();
             }
-            this.experience.push([[...this.last_obs, this.last_act],
-            (1 - this.alpha) * this.predict_q(this.last_obs, this.last_act)
-            + this.alpha * [this.last_reward + this.gamma * (this.current_q)]
+            this.experience.push([this.net_repr(this.last_obs, this.last_act),
+                (1 - this.alpha) * this.predict_q(this.last_obs, this.last_act)
+                + this.alpha * [this.last_reward + this.gamma * (this.current_q)]
             ]);
         }
         // learn from this.experience
@@ -145,7 +145,7 @@ export class DQNAgent {
         for (let i = 0; i < GRIDH; i++) {
             for (let j = 0; j < GRIDW; j++) {
                 for (let k = 1; k <= 4; k++) {
-                    this.allStateActionPairs.push([i, j, k]);
+                    this.allStateActionPairs.push(this.net_repr([i,j], k));
                 }
             }
         }
@@ -153,7 +153,7 @@ export class DQNAgent {
         this.getArrowWeights = () => tf.tidy(() => {
             const t = tf.tensor(this.allStateActionPairs);
             const d = this.qnet.predict(t).dataSync();
-            return this.allStateActionPairs.map((v, i) => [...v, d[i]]);
+            return this.allStateActionPairs.map((v, i) => [...this.net_repr_inv(...v), d[i]]);
         })
 
 
@@ -195,14 +195,15 @@ export class DQNAgent {
 
     display() {
         const SCALE = 3;
-        for (const [i, j, k, v] of this.getArrowWeights()) {
-            const idx = i * GRIDW + j;
+        for (const [pos, k, v] of this.getArrowWeights()) {
+            const [i,j] = pos;
+            const idx = i * GRIDW + j;            
             if (v > 0) {
                 this.arrows[k - 1][idx][0].scale.set(v / SCALE);
                 this.arrows[k - 1][idx][1].scale.set(0);
             } else {
                 this.arrows[k - 1][idx][0].scale.set(0);
-                this.arrows[k - 1][idx][1].scale.set(v / SCALE);
+                this.arrows[k - 1][idx][1].scale.set(- v / SCALE);
             }
         }
         setStatus2(`iter:${round2(this.time)}
